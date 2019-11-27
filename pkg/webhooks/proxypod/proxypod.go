@@ -124,6 +124,13 @@ func (h *Handler) Handle(ctx context.Context, req atypes.Request) atypes.Respons
 		// the feedback controller will send SIGUSR1 or SIGUSR2 when the delegate pod succeeds or fails, resp.
 	}
 	// TODO: add resource reqs/lims + other best practices
+	
+	// Selecting master node for running proxy pods, as suggested by adrienjt
+	proxyPod.Spec.NodeSelector = map[string]string{"node-role.kubernetes.io/master":""}
+        proxyPod.Spec.Tolerations[0] = corev1.Toleration{
+		 Key: 		  "node-role.kubernetes.io/master",
+		 Operator: 	  "Exists",
+		 Effect: 	  "NoSchedule"} 
 
 	return admission.PatchResponse(srcPod, proxyPod)
 }
